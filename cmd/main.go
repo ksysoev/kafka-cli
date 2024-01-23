@@ -88,9 +88,10 @@ func Consume(args []string) {
 
 	mechanism, _ := scram.Mechanism(scram.SHA256, username, password)
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{address},
-		GroupID: uuid.New().String(),
-		Topic:   topic,
+		Brokers:     []string{address},
+		GroupID:     uuid.New().String(),
+		Topic:       topic,
+		StartOffset: kafka.LastOffset,
 		Dialer: &kafka.Dialer{
 			SASLMechanism: mechanism,
 			TLS:           &tls.Config{},
@@ -104,6 +105,14 @@ func Consume(args []string) {
 			os.Exit(1)
 		}
 
-		fmt.Println("Message received: ", m.Key, string(m.Value))
+		if len(m.Key) > 0 {
+			fmt.Println("Key: ", string(m.Key))
+		}
+
+		if len(m.Value) > 0 {
+			fmt.Println(string(m.Value))
+		}
+
+		fmt.Println("")
 	}
 }
